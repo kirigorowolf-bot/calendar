@@ -220,13 +220,15 @@
     async function sendToGas() {
         const btn = document.getElementById('main-submit');
         const data = {
-            dateStart: document.getElementById('dateStart').value,
-            dateEnd: document.getElementById('dateEnd').value || document.getElementById('dateStart').value,
-            time: document.getElementById('time').value,
-            place: document.getElementById('place').value,
-            title: document.getElementById('title').value,
-            category: document.querySelector('input[name="cat"]:checked')?.value
-        };
+    dateStart: document.getElementById('dateStart').value,
+    dateEnd: document.getElementById('dateEnd').value || document.getElementById('dateStart').value,
+    time: document.getElementById('time').value,
+    isFullDay: document.getElementById('allDay').checked, // ВОТ ЭТА СТРОКА
+    place: document.getElementById('place').value,
+    title: document.getElementById('title').value,
+    category: document.querySelector('input[name="cat"]:checked')?.value
+};
+
 
         if (!data.dateStart || !data.title || !data.category) {
             showToast("Заполни все поля!", "var(--error)");
