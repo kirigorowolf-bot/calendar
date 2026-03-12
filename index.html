@@ -218,7 +218,6 @@
 
     // Функция удаления данных
 async function deleteEvent(eventText, d, m, y) {
-    if (!confirm(`Точно выкопать "${eventText}"?`)) return;
 
     showToast("Выкапываем...");
     try {
@@ -277,19 +276,34 @@ function showDayDetails(d, m, y, el) {
     box.innerHTML = html;
 }
 
-    function goToAddTab(dateStr) {
-    // 1. Подставляем дату в инпут начала
-    document.getElementById('dateStart').value = dateStr;
-    // 2. Очищаем дату конца (на случай если там что-то было)
-    document.getElementById('dateEnd').value = "";
-    // 3. Сбрасываем блокировку времени (так как дата теперь одна)
-    checkDateRange(); 
-    // 4. Переключаем вкладку
-    showTab('add');
-    // 5. Скроллим вверх, чтобы сразу видеть форму
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+   function goToAddTab(dateStr) {
+    // 1. Находим инпут даты начала и подставляем значение
+    const dateInput = document.getElementById('dateStart');
+    if (dateInput) {
+        dateInput.value = dateStr;
+    }
     
-    showToast("Дата подставлена! 🐾");
+    // 2. Очищаем дату конца, чтобы не было диапазона
+    const dateEndInput = document.getElementById('dateEnd');
+    if (dateEndInput) {
+        dateEndInput.value = "";
+    }
+
+    // 3. Вызываем визуальное переключение вкладки
+    showTab('add');
+
+    // 4. Принудительно вызываем проверку диапазона, чтобы разблокировать время
+    if (typeof checkDateRange === "function") {
+        checkDateRange();
+    }
+
+    // 5. Прокрутка вверх, чтобы сразу видеть поля ввода на смартфоне
+    window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+    });
+
+    showToast("Дата подставлена! 🐺");
 }
 
     // Функция внесения данных
