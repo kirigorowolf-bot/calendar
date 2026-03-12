@@ -167,58 +167,62 @@
     }
 
     function renderCalendar(mIdx) {
-        currentMonth = mIdx;
-        renderMonths();
-        const grid = document.getElementById('calendar-days');
-        grid.innerHTML = '';
-        const daysInMonth = new Date(currentYear, mIdx + 1, 0).getDate();
+    currentMonth = mIdx;
+    renderMonths();
+    const grid = document.getElementById('calendar-days');
+    grid.innerHTML = '';
+    const daysInMonth = new Date(currentYear, mIdx + 1, 0).getDate();
+    
+    const firstDay = new Date(currentYear, mIdx, 1).getDay();
+    const offset = firstDay === 0 ? 6 : firstDay - 1;
+    for(let i=0; i<offset; i++) grid.innerHTML += '<div></div>';
+
+    for(let d=1; d<=daysInMonth; d++) {
+        // Ищем данные, передавая ДЕНЬ, МЕСЯЦ и ТЕКУЩИЙ ВЫБРАННЫЙ ГОД
+        const events = getDayData(d, mIdx, currentYear);
         
-        // Расчет отступа для ПН-ВС
-        const firstDay = new Date(currentYear, mIdx, 1).getDay();
-        const offset = firstDay === 0 ? 6 : firstDay - 1;
-        for(let i=0; i<offset; i++) grid.innerHTML += '<div></div>';
-
-        for(let d=1; d<=daysInMonth; d++) {
-            const dStr = d + "." + ("0" + (mIdx + 1)).slice(-2);
-            const dFull = ("0" + d).slice(-2) + "." + ("0" + (mIdx + 1)).slice(-2);
-            
-            const events = getDayData(dStr, dFull);
-            
-            let bg = '#fff'; // По умолчанию белый
-            if (events.length > 1) {
-                bg = '#b2bec3'; // Серый, если событий несколько
-            } else if (events.length === 1) {
-                bg = events[0].color; // ТУТ БЫЛА ОШИБКА: берем цвет первого события
-            }
-            
-            grid.innerHTML += `<div class="day" style="background:${bg}" onclick="showDayDetails('${dStr}', '${dFull}', this)">${d}</div>`;
-        }
+        let bg = '#fff';
+        if (events.length > 1) bg = '#b2bec3';
+        else if (events.length === 1) bg = events[0].color;
+        
+        grid.innerHTML += `<div class="day" style="background:${bg}" onclick="showDayDetails(${d}, ${mIdx}, ${currentYear}, this)">${d}</div>`;
     }
+}
 
-    function getDayData(s1, s2) {
-        let evs = [];
-        if (!dbData) return evs;
-        for(let r=0; r<dbData.values.length; r++) {
-            for(let c=0; c<dbData.values[r].length; c++) {
-                let cell = dbData.values[r][c].toString().trim();
-                if (cell === s1 || cell === s2) {
-                    for(let h=1; h<=14; h++) {
-                        if (dbData.values[r+h] && dbData.values[r+h][c] && dbData.values[r+h][c].trim() !== "") {
-                            evs.push({ text: dbData.values[r+h][c], color: dbData.colors[r+h][c] });
-                        }
+    function getDayData(d, m, y) {
+    let evs = [];
+    if (!dbData) return evs;
+
+    // Собираем строку поиска: "13.03.2025" или "01.01.2024"
+    const searchDate = ("0" + d).slice(-2) + "." + ("0" + (m + 1)).slice(-2) + "." + y;
+
+    const vals = dbData.values;
+    const bgs = dbData.colors;
+
+    for(let r=0; r<vals.length; r++) {
+        for(let c=0; c<vals[r].length; c++) {
+            // Сравниваем ячейку с нашей строкой (например "13.03.2025")
+            if (vals[r][c] === searchDate) {
+                // Если дата совпала, забираем 14 строк под ней
+                for(let h=1; h<=14; h++) {
+                    if (vals[r+h] && vals[r+h][c] && vals[r+h][c].trim() !== "") {
+                        evs.push({ text: vals[r+h][c], color: bgs[r+h][c] });
                     }
                 }
             }
         }
-        return evs;
     }
+    return evs;
+}
 
-    function showDayDetails(s1, s2, el) {
-        document.querySelectorAll('.day').forEach(d => d.classList.remove('selected'));
-        el.classList.add('selected');
-        const evs = getDayData(s1, s2);
-        document.getElementById('day-details').innerHTML = evs.length ? evs.map(e => `<div class="event-line" style="border-color:${e.color}">${e.text}</div>`).join('') : "Пусто";
-    }
+function showDayDetails(d, m, y, el) {
+    document.querySelectorAll('.day').forEach(div => div.classList.remove('selected'));
+    el.classList.add('selected');
+    const evs = getDayData(d, m, y);
+    const box = document.getElementById('day-details');
+    const dateTitle = ("0" + d).slice(-2) + "." + ("0" + (m + 1)).slice(-2) + "." + y;
+    box.innerHTML = evs.length ? `<b>${dateTitle}:</b><br><br>` + evs.map(e => `<div class="event-line" style="border-color:${e.color}">${e.text}</div>`).join('') : "Пусто";
+}
 
     async function sendToGas() {
     const btn = document.getElementById('main-submit');
