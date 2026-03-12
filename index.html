@@ -83,7 +83,13 @@
     <div id="tab-add">
         <label>Дата начала:</label> <input type="date" id="dateStart">
         <label>Дата конца (диапазон):</label> <input type="date" id="dateEnd">
-        <label>Время (ЧЧ:ММ):</label> <input type="time" id="time">
+        <label>Время (ЧЧ:ММ):</label>
+<div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+    <input type="time" id="time" style="margin: 0; flex: 2;">
+    <label style="flex: 1; font-size: 14px; display: flex; align-items: center; gap: 5px; cursor: pointer; background: #eee; padding: 10px; border-radius: 8px;">
+        <input type="checkbox" id="allDay" style="width: auto; margin: 0;"> Весь день
+    </label>
+</div>
         <input type="text" id="place" placeholder="Место под лёжку">
         <input type="text" id="title" placeholder="Название">
         <div class="categories">
