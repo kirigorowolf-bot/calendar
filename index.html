@@ -220,37 +220,47 @@
     }
 
     async function sendToGas() {
-        const btn = document.getElementById('main-submit');
-        const data = {
-    dateStart: document.getElementById('dateStart').value,
-    dateEnd: document.getElementById('dateEnd').value || document.getElementById('dateStart').value,
-    timeStart: document.getElementById('timeStart').value,
-    timeEnd: document.getElementById('timeEnd').value, // Новое поле
-    isFullDay: document.getElementById('allDay').checked,
-    place: document.getElementById('place').value,
-    title: document.getElementById('title').value,
-    category: document.querySelector('input[name="cat"]:checked')?.value
-};
+    const btn = document.getElementById('main-submit');
+    const data = {
+        dateStart: document.getElementById('dateStart').value,
+        dateEnd: document.getElementById('dateEnd').value || document.getElementById('dateStart').value,
+        timeStart: document.getElementById('timeStart').value,
+        timeEnd: document.getElementById('timeEnd').value,
+        isFullDay: document.getElementById('allDay').checked,
+        place: document.getElementById('place').value,
+        title: document.getElementById('title').value,
+        category: document.querySelector('input[name="cat"]:checked')?.value
+    };
 
-
-        if (!data.dateStart || !data.title || !data.category) {
-            showToast("Заполни все поля!", "var(--error)");
-            return;
-        }
-
-        btn.innerText = "ЗАКАПЫВАЕМ...";
-        btn.disabled = true;
-
-        try {
-            await fetch(API_URL, { method: 'POST', body: JSON.stringify(data) });
-            showToast("Успешно закопано, ауф! 🐺", "var(--success)");
-            setTimeout(() => location.reload(), 1500);
-        } catch(e) {
-            showToast("Ошибка!", "var(--error)");
-            btn.disabled = false;
-            btn.innerText = "ЗАКОПАТЬ В КАЛЕНДАРЬ";
-        }
+    if (!data.dateStart || !data.title || !data.category) {
+        showToast("Заполни Дату, Название и Категорию!", "var(--error)");
+        return;
     }
+
+    btn.innerText = "ЗАКАПЫВАЕМ...";
+    btn.disabled = true;
+
+    try {
+        const response = await fetch(API_URL, {
+            method: 'POST',
+            body: JSON.stringify(data)
+        });
+        const result = await response.text();
+        
+        if (result.includes("Закопано")) {
+            showToast("Успешно закопано! 🐺", "var(--success)");
+            setTimeout(() => location.reload(), 1000);
+        } else {
+            showToast("Сервер ответил ошибкой", "var(--error)");
+            btn.disabled = false;
+        }
+    } catch(e) {
+        showToast("Ошибка сети", "var(--error)");
+        btn.disabled = false;
+        btn.innerText = "🐾 ЗАКОПАТЬ В КАЛЕНДАРЬ 🐾";
+    }
+}
+
 </script>
 </body>
 </html>
