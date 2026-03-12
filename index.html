@@ -14,7 +14,21 @@
         .nav-btns button.active { background: var(--primary); color: white; }
         
         input, select, button { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #dfe6e9; border-radius: 8px; box-sizing: border-box; font-size: 16px; }
-        .categories { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; background: #f9f9f9; padding: 12px; border-radius: 10px; margin: 10px 0; }
+                .categories { 
+            display: grid; 
+            /* Создаем две равные колонки */
+            grid-template-columns: 1fr 1fr; 
+            /* Заставляем элементы заполнять колонки сверху вниз, а не слева направо */
+            grid-auto-flow: column;
+            /* Указываем количество строк (4 строки, чтобы влезли первые 4 элемента) */
+            grid-template-rows: repeat(4, auto);
+            gap: 8px; 
+            background: #f9f9f9; 
+            padding: 12px; 
+            border-radius: 10px; 
+            margin: 10px 0; 
+        }
+
         .cat-item { font-size: 14px; display: flex; align-items: center; gap: 8px; cursor: pointer; }
         
         .btn-submit { background: var(--success); color: white; border: none; font-weight: bold; margin-top: 15px; cursor: pointer; }
