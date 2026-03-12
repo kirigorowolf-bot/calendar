@@ -215,13 +215,42 @@
     return evs;
 }
 
+    async function deleteEvent(eventText) {
+    if (!confirm(`Точно удалить "${eventText}"?`)) return;
+
+    showToast("Выкапываем...");
+    try {
+        const response = await fetch(API_URL, {
+            method: 'POST',
+            body: JSON.stringify({ type: 'DELETE', text: eventText })
+        });
+        const result = await response.text();
+        if (result.includes("Закопано")) {
+            showToast("Удалено!", "var(--success)");
+            loadData(); // Перезагружаем данные, чтобы обновить календарь
+        }
+    } catch(e) {
+        showToast("Ошибка при удалении", "var(--error)");
+    }
+}
+    
 function showDayDetails(d, m, y, el) {
     document.querySelectorAll('.day').forEach(div => div.classList.remove('selected'));
     el.classList.add('selected');
     const evs = getDayData(d, m, y);
     const box = document.getElementById('day-details');
     const dateTitle = ("0" + d).slice(-2) + "." + ("0" + (m + 1)).slice(-2) + "." + y;
-    box.innerHTML = evs.length ? `<b>${dateTitle}:</b><br><br>` + evs.map(e => `<div class="event-line" style="border-color:${e.color}">${e.text}</div>`).join('') : "Пусто";
+    
+    if (evs.length > 0) {
+        box.innerHTML = `<b>${dateTitle}:</b><br><br>` + evs.map(e => `
+            <div class="event-line" style="border-color:${e.color}; display: flex; justify-content: space-between; align-items: center;">
+                <span>${e.text}</span>
+                <span onclick="deleteEvent('${e.text}')" style="cursor:pointer; padding: 5px; filter: grayscale(1);">🗑️</span>
+            </div>
+        `).join('');
+    } else {
+        box.innerHTML = `<b>${dateTitle}:</b><br>Пусто`;
+    }
 }
 
     async function sendToGas() {
