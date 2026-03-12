@@ -83,10 +83,12 @@
     <div id="tab-add">
         <label>Дата начала:</label> <input type="date" id="dateStart">
         <label>Дата конца (диапазон):</label> <input type="date" id="dateEnd">
-        <label>Время (ЧЧ:ММ):</label>
-<div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
-    <input type="time" id="time" style="margin: 0; flex: 2;">
-    <label style="flex: 1; font-size: 14px; display: flex; align-items: center; gap: 5px; cursor: pointer; background: #eee; padding: 10px; border-radius: 8px;">
+        <label>Время:</label>
+<div style="display: flex; align-items: center; gap: 5px; margin-bottom: 8px;">
+    <input type="time" id="timeStart" style="margin: 0; flex: 1;" placeholder="С">
+    <span style="font-weight: bold;">—</span>
+    <input type="time" id="timeEnd" style="margin: 0; flex: 1;" placeholder="По">
+    <label style="flex: 1; font-size: 12px; display: flex; align-items: center; gap: 3px; cursor: pointer; background: #eee; padding: 8px; border-radius: 8px; white-space: nowrap;">
         <input type="checkbox" id="allDay" style="width: auto; margin: 0;"> Весь день
     </label>
 </div>
@@ -222,8 +224,9 @@
         const data = {
     dateStart: document.getElementById('dateStart').value,
     dateEnd: document.getElementById('dateEnd').value || document.getElementById('dateStart').value,
-    time: document.getElementById('time').value,
-    isFullDay: document.getElementById('allDay').checked, // ВОТ ЭТА СТРОКА
+    timeStart: document.getElementById('timeStart').value,
+    timeEnd: document.getElementById('timeEnd').value, // Новое поле
+    isFullDay: document.getElementById('allDay').checked,
     place: document.getElementById('place').value,
     title: document.getElementById('title').value,
     category: document.querySelector('input[name="cat"]:checked')?.value
