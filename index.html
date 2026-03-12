@@ -14,22 +14,37 @@
         .nav-btns button.active { background: var(--primary); color: white; }
         
         input, select, button { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #dfe6e9; border-radius: 8px; box-sizing: border-box; font-size: 16px; }
-                .categories { 
+       .categories { 
             display: grid; 
-            /* Создаем две равные колонки */
+            /* Две колонки по 50% ширины */
             grid-template-columns: 1fr 1fr; 
-            /* Заставляем элементы заполнять колонки сверху вниз, а не слева направо */
+            /* Заполнение сначала первой колонки вниз, потом второй */
             grid-auto-flow: column;
-            /* Указываем количество строк (4 строки, чтобы влезли первые 4 элемента) */
             grid-template-rows: repeat(4, auto);
-            gap: 8px; 
+            gap: 10px; 
             background: #f9f9f9; 
-            padding: 12px; 
+            padding: 15px; 
             border-radius: 10px; 
             margin: 10px 0; 
         }
 
-        .cat-item { font-size: 14px; display: flex; align-items: center; gap: 8px; cursor: pointer; }
+        .cat-item { 
+            font-size: 14px; 
+            display: flex; 
+            align-items: center; 
+            /* Выравнивание содержимого по левому краю */
+            justify-content: flex-start; 
+            gap: 10px; 
+            cursor: pointer;
+            /* Чтобы текст не переносился и не ломал сетку */
+            white-space: nowrap; 
+        }
+
+        .cat-item input {
+            /* Убираем лишние отступы у самих кружков, если они есть */
+            margin: 0;
+            width: auto;
+        }
         
         .btn-submit { background: var(--success); color: white; border: none; font-weight: bold; margin-top: 15px; cursor: pointer; }
 
