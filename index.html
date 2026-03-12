@@ -5,28 +5,40 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ПРОСТО_ДУШНЫЙ КАЛЕНДАРЬ</title>
     <style>
-        body { font-family: sans-serif; background: #f0f2f5; margin: 0; padding: 15px; }
-        .card { background: white; border-radius: 12px; padding: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); max-width: 500px; margin: auto; }
+        :root { --primary: #6c5ce7; --bg: #f0f2f5; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg); margin: 0; padding: 15px; color: #2d3436; }
+        .card { background: white; border-radius: 16px; padding: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); max-width: 500px; margin: auto; }
         .nav-btns { display: flex; gap: 10px; margin-bottom: 20px; }
-        .nav-btns button { flex: 1; padding: 10px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; }
-        .active { background: #007bff; color: white; }
+        .nav-btns button { flex: 1; padding: 12px; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; background: #dfe6e9; transition: 0.3s; }
+        .nav-btns button.active { background: var(--primary); color: white; }
         
-        input, select, button { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; }
+        input, select, button { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #dfe6e9; border-radius: 8px; box-sizing: border-box; font-size: 16px; }
+        .categories { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; background: #f9f9f9; padding: 12px; border-radius: 10px; margin: 10px 0; }
+        .cat-item { font-size: 14px; display: flex; align-items: center; gap: 8px; cursor: pointer; }
         
-        .categories { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; background: #f9f9f9; padding: 10px; border-radius: 8px; }
-        .cat-item { font-size: 14px; display: flex; align-items: center; gap: 5px; }
+        .btn-submit { background: #00b894; color: white; border: none; font-weight: bold; margin-top: 15px; }
         
-        .btn-submit { background: #28a745; color: white; border: none; font-size: 16px; margin-top: 15px; }
+        /* Сетка календаря */
+        .year-row { display: flex; gap: 5px; margin-bottom: 10px; }
+        .month-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; margin-bottom: 15px; }
+        .month-btn { padding: 8px; font-size: 12px; background: #eee; border: none; border-radius: 5px; cursor: pointer; }
+        .month-btn.active { background: var(--primary); color: white; }
         
-        /* Сетка календаря для РАЗНЮХАТЬ */
-        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; text-align: center; }
-        .day { padding: 10px 0; border-radius: 4px; border: 1px solid #eee; font-size: 12px; cursor: pointer; }
+        .calendar-header { display: grid; grid-template-columns: repeat(7, 1fr); text-align: center; font-weight: bold; font-size: 12px; margin-bottom: 5px; color: #636e72; }
+        .calendar-days { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+        .day { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; border-radius: 8px; font-size: 14px; cursor: pointer; border: 1px solid #f1f2f6; background: #fff; position: relative; }
+        .day.has-multi { background: #b2bec3 !important; color: white; } /* Серый если много дел */
+        .day.selected { outline: 2px solid var(--primary); z-index: 1; }
+
+        #day-details { margin-top: 20px; padding: 15px; background: #f1f2f6; border-radius: 10px; min-height: 50px; }
+        .event-item { font-size: 14px; margin-bottom: 5px; padding-bottom: 5px; border-bottom: 1px solid #ddd; }
+        .loading { text-align: center; color: #636e72; font-style: italic; }
     </style>
 </head>
 <body>
 
 <div class="card">
-    <h2 id="main-title">ПРОСТО_ДУШНЫЙ</h2>
+    <h2 style="text-align: center; margin-top: 0;">ПРОСТО_ДУШНЫЙ</h2>
     
     <div class="nav-btns">
         <button id="btn-add" class="active" onclick="showTab('add')">ВНЕСТИ</button>
@@ -35,14 +47,13 @@
 
     <!-- Ветка ВНЕСТИ -->
     <div id="tab-add">
-        <label>С даты:</label> <input type="date" id="dateStart">
-        <label>По дату (необяз.):</label> <input type="date" id="dateEnd">
-        <label>Время:</label> <input type="time" id="time">
+        <label>Дата начала:</label> <input type="date" id="dateStart">
+        <label>Дата конца (если диапазон):</label> <input type="date" id="dateEnd">
+        <label>Время (для одного дня):</label> <input type="time" id="time">
         <input type="text" id="place" placeholder="Место под лёжку">
         <input type="text" id="title" placeholder="Название">
         
-        <div class="categories" id="cat-box">
-            <!-- Категории -->
+        <div class="categories">
             <label class="cat-item"><input type="radio" name="cat" value="Концерт"> Концерт</label>
             <label class="cat-item"><input type="radio" name="cat" value="Репетиция"> Репетиция</label>
             <label class="cat-item"><input type="radio" name="cat" value="Фест"> Фест</label>
@@ -57,37 +68,129 @@
 
     <!-- Ветка РАЗНЮХАТЬ -->
     <div id="tab-find" style="display:none;">
-        <div id="year-select" style="display:flex; gap:5px;">
+        <div class="year-row">
             <button onclick="setYear(2024)">2024</button>
             <button onclick="setYear(2025)">2025</button>
             <button onclick="setYear(2026)">2026</button>
         </div>
-        <div id="month-grid" style="display:grid; grid-template-columns: repeat(3,1fr); gap:5px; margin-top:10px;">
-            <!-- Сюда вставим месяцы -->
+        <div class="month-grid" id="month-buttons"></div>
+        
+        <div id="calendar-container" style="display:none;">
+            <div class="calendar-header">
+                <div>ПН</div><div>ВТ</div><div>СР</div><div>ЧТ</div><div>ПТ</div><div>СБ</div><div>ВС</div>
+            </div>
+            <div class="calendar-days" id="calendar-days"></div>
         </div>
-        <div id="calendar-view" style="margin-top:20px;"></div>
+
+        <div id="day-details">Выберите дату, чтобы разнюхать расписание...</div>
     </div>
 </div>
 
 <script>
     const API_URL = "https://script.google.com/macros/s/AKfycbxRcFveRSwoOX2xhiS48tz0m2crUiZkrxaVguqrcbl8Z_y_BimWvO4GnE3d_QgGUhinuQ/exec";
+    let dbData = null; // Тут будут все данные из таблицы
+    let currentYear = 2024;
+    let currentMonth = 0;
+
+    const MONTHS = ["ЯНВ","ФЕВ","МАРТ","АПР","МАЙ","ИЮНЬ","ИЮЛЬ","АВГ","СЕНТ","ОКТ","НОЯБ","ДЕК"];
 
     function showTab(tab) {
         document.getElementById('tab-add').style.display = tab === 'add' ? 'block' : 'none';
         document.getElementById('tab-find').style.display = tab === 'find' ? 'block' : 'none';
-        document.getElementById('btn-add').className = tab === 'add' ? 'active' : '';
-        document.getElementById('btn-find').className = tab === 'find' ? 'active' : '';
+        document.querySelectorAll('.nav-btns button').forEach(b => b.classList.remove('active'));
+        document.getElementById('btn-' + tab).classList.add('active');
+        if(tab === 'find' && !dbData) loadData();
     }
 
-    // Блокировка времени, если выбран диапазон
-    document.getElementById('dateEnd').onchange = function() {
-        const timeInput = document.getElementById('time');
-        timeInput.disabled = this.value && this.value !== document.getElementById('dateStart').value;
-    };
+    async function loadData() {
+        const details = document.getElementById('day-details');
+        details.innerHTML = '<div class="loading">Синхронизация с базой...</div>';
+        try {
+            const resp = await fetch(API_URL);
+            dbData = await resp.json();
+            details.innerHTML = "Данные подтянуты. Выбирай месяц.";
+            renderMonths();
+        } catch(e) { details.innerHTML = "Ошибка связи с таблицей."; }
+    }
+
+    function renderMonths() {
+        const grid = document.getElementById('month-buttons');
+        grid.innerHTML = MONTHS.map((m, i) => `<button class="month-btn" onclick="renderCalendar(${i})">${m}</button>`).join('');
+    }
+
+    function setYear(y) { currentYear = y; renderCalendar(currentMonth); }
+
+    function renderCalendar(monthIdx) {
+        currentMonth = monthIdx;
+        document.getElementById('calendar-container').style.display = 'block';
+        const grid = document.getElementById('calendar-days');
+        grid.innerHTML = '';
+        
+        const firstDay = new Date(currentYear, monthIdx, 1).getDay();
+        const daysInMonth = new Date(currentYear, monthIdx + 1, 0).getDate();
+        const offset = firstDay === 0 ? 6 : firstDay - 1;
+
+        for(let i=0; i<offset; i++) grid.innerHTML += '<div></div>';
+
+        for(let d=1; d<=daysInMonth; d++) {
+            const dateStr = `${String(d).padStart(2,'0')}.${String(monthIdx+1).padStart(2,'0')}`;
+            const info = getDayInfo(dateStr);
+            const colorStyle = info.color ? `style="background:${info.color}"` : '';
+            const multiClass = info.count > 1 ? 'has-multi' : '';
+            
+            grid.innerHTML += `<div class="day ${multiClass}" ${colorStyle} onclick="showDayDetails('${dateStr}', this)">${d}</div>`;
+        }
+    }
+
+    function getDayInfo(dateStr) {
+        if(!dbData) return {};
+        let count = 0;
+        let lastColor = "";
+        // Ищем дату в первой строке блоков (на основе твоей разметки)
+        for(let c=0; c < dbData.values[6].length; c++) { // 6 строка - это где 01.01 и т.д.
+            // Проходим по всем строкам дат (7, 23 и т.д. с шагом 16)
+            for(let r=6; r < dbData.values.length; r += 16) {
+                if(dbData.values[r] && dbData.values[r][c] == dateStr) {
+                    // Проверяем 14 ячеек под датой
+                    for(let h=1; h<=14; h++) {
+                        if(dbData.values[r+h] && dbData.values[r+h][c]) {
+                            count++;
+                            lastColor = dbData.colors[r+h][c];
+                        }
+                    }
+                }
+            }
+        }
+        return { count, color: count === 1 ? lastColor : null };
+    }
+
+    function showDayDetails(dateStr, el) {
+        document.querySelectorAll('.day').forEach(d => d.classList.remove('selected'));
+        el.classList.add('selected');
+        
+        let html = `<b>Расписание на ${dateStr}:</b><br><br>`;
+        let found = false;
+
+        for(let c=0; c < dbData.values[6].length; c++) {
+            for(let r=6; r < dbData.values.length; r += 16) {
+                if(dbData.values[r][c] == dateStr) {
+                    for(let h=1; h<=14; h++) {
+                        let val = dbData.values[r+h][c];
+                        if(val) {
+                            let time = (h + 8) + ":00"; // Простое сопоставление строки времени
+                            html += `<div class="event-item">🕒 ${val}</div>`;
+                            found = true;
+                        }
+                    }
+                }
+            }
+        }
+        document.getElementById('day-details').innerHTML = found ? html : "На этот день ничего не закопано.";
+    }
 
     async function sendToGas() {
+        const btn = document.querySelector('.btn-submit');
         const data = {
-            type: 'ADD',
             dateStart: document.getElementById('dateStart').value,
             dateEnd: document.getElementById('dateEnd').value || document.getElementById('dateStart').value,
             time: document.getElementById('time').value,
@@ -95,22 +198,13 @@
             title: document.getElementById('title').value,
             category: document.querySelector('input[name="cat"]:checked')?.value
         };
-
-        const btn = document.querySelector('.btn-submit');
-        btn.innerText = "ЗАКАПЫВАЕМ...";
         
-        await fetch(API_URL, {
-            method: 'POST',
-            body: JSON.stringify(data)
-        });
-
-        alert("Закопано успешно!");
+        btn.innerText = "ЗАКАПЫВАЕМ...";
+        await fetch(API_URL, { method: 'POST', body: JSON.stringify(data) });
+        alert("Успешно!");
         btn.innerText = "ЗАКОПАТЬ В КАЛЕНДАРЬ";
+        loadData(); // Обновляем локальную базу
     }
-
-    // Логика "РАЗНЮХАТЬ" (упрощенная для примера)
-    function setYear(y) { alert("Выбран год " + y + ". Для работы поиска нужно подгрузить данные из doGet"); }
 </script>
-
 </body>
 </html>
