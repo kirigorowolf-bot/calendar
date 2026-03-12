@@ -95,7 +95,7 @@
             <label class="cat-item"><input type="radio" name="cat" value="Гладиатор"> Гладиатор</label>
             <label class="cat-item"><input type="radio" name="cat" value="Другое"> Другое</label>
         </div>
-        <button class="btn-submit" id="main-submit" onclick="sendToGas()">ЗАКОПАТЬ В КАЛЕНДАРЬ</button>
+        <button class="btn-submit" id="main-submit" onclick="sendToGas()">🐾ЗАКОПАТЬ В КАЛЕНДАРЬ🐾</button>
     </div>
 
     <div id="tab-find" style="display:none;">
@@ -164,14 +164,23 @@
         grid.innerHTML = '';
         const daysInMonth = new Date(currentYear, mIdx + 1, 0).getDate();
         
+        // Расчет отступа для ПН-ВС
+        const firstDay = new Date(currentYear, mIdx, 1).getDay();
+        const offset = firstDay === 0 ? 6 : firstDay - 1;
+        for(let i=0; i<offset; i++) grid.innerHTML += '<div></div>';
+
         for(let d=1; d<=daysInMonth; d++) {
             const dStr = d + "." + ("0" + (mIdx + 1)).slice(-2);
             const dFull = ("0" + d).slice(-2) + "." + ("0" + (mIdx + 1)).slice(-2);
+            
             const events = getDayData(dStr, dFull);
             
-            let bg = '#fff';
-            if (events.length > 1) bg = '#b2bec3';
-            else if (events.length === 1) bg = events[0].color;
+            let bg = '#fff'; // По умолчанию белый
+            if (events.length > 1) {
+                bg = '#b2bec3'; // Серый, если событий несколько
+            } else if (events.length === 1) {
+                bg = events[0].color; // ТУТ БЫЛА ОШИБКА: берем цвет первого события
+            }
             
             grid.innerHTML += `<div class="day" style="background:${bg}" onclick="showDayDetails('${dStr}', '${dFull}', this)">${d}</div>`;
         }
@@ -223,7 +232,7 @@
 
         try {
             await fetch(API_URL, { method: 'POST', body: JSON.stringify(data) });
-            showToast("Успешно закопано!", "var(--success)");
+            showToast("Успешно закопано, ауф! 🐺", "var(--success)");
             setTimeout(() => location.reload(), 1500);
         } catch(e) {
             showToast("Ошибка!", "var(--error)");
