@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ПРОСТО_ДУШНЫЙ КАЛЕНДАРЬ</title>
+    <style>
+        body { font-family: sans-serif; background: #f0f2f5; margin: 0; padding: 15px; }
+        .card { background: white; border-radius: 12px; padding: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); max-width: 500px; margin: auto; }
+        .nav-btns { display: flex; gap: 10px; margin-bottom: 20px; }
+        .nav-btns button { flex: 1; padding: 10px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; }
+        .active { background: #007bff; color: white; }
+        
+        input, select, button { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; }
+        
+        .categories { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; background: #f9f9f9; padding: 10px; border-radius: 8px; }
+        .cat-item { font-size: 14px; display: flex; align-items: center; gap: 5px; }
+        
+        .btn-submit { background: #28a745; color: white; border: none; font-size: 16px; margin-top: 15px; }
+        
+        /* Сетка календаря для РАЗНЮХАТЬ */
+        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; text-align: center; }
+        .day { padding: 10px 0; border-radius: 4px; border: 1px solid #eee; font-size: 12px; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <h2 id="main-title">ПРОСТО_ДУШНЫЙ</h2>
+    
+    <div class="nav-btns">
+        <button id="btn-add" class="active" onclick="showTab('add')">ВНЕСТИ</button>
+        <button id="btn-find" onclick="showTab('find')">РАЗНЮХАТЬ</button>
+    </div>
+
+    <!-- Ветка ВНЕСТИ -->
+    <div id="tab-add">
+        <label>С даты:</label> <input type="date" id="dateStart">
+        <label>По дату (необяз.):</label> <input type="date" id="dateEnd">
+        <label>Время:</label> <input type="time" id="time">
+        <input type="text" id="place" placeholder="Место под лёжку">
+        <input type="text" id="title" placeholder="Название">
+        
+        <div class="categories" id="cat-box">
+            <!-- Категории -->
+            <label class="cat-item"><input type="radio" name="cat" value="Концерт"> Концерт</label>
+            <label class="cat-item"><input type="radio" name="cat" value="Репетиция"> Репетиция</label>
+            <label class="cat-item"><input type="radio" name="cat" value="Фест"> Фест</label>
+            <label class="cat-item"><input type="radio" name="cat" value="ИСИ"> ИСИ</label>
+            <label class="cat-item"><input type="radio" name="cat" value="ДР"> ДР</label>
+            <label class="cat-item"><input type="radio" name="cat" value="Гладиатор"> Гладиатор</label>
+            <label class="cat-item"><input type="radio" name="cat" value="Другое"> Другое</label>
+        </div>
+        
+        <button class="btn-submit" onclick="sendToGas()">ЗАКОПАТЬ В КАЛЕНДАРЬ</button>
+    </div>
+
+    <!-- Ветка РАЗНЮХАТЬ -->
+    <div id="tab-find" style="display:none;">
+        <div id="year-select" style="display:flex; gap:5px;">
+            <button onclick="setYear(2024)">2024</button>
+            <button onclick="setYear(2025)">2025</button>
+            <button onclick="setYear(2026)">2026</button>
+        </div>
+        <div id="month-grid" style="display:grid; grid-template-columns: repeat(3,1fr); gap:5px; margin-top:10px;">
+            <!-- Сюда вставим месяцы -->
+        </div>
+        <div id="calendar-view" style="margin-top:20px;"></div>
+    </div>
+</div>
+
+<script>
+    const API_URL = "https://script.google.com/macros/s/AKfycbxRcFveRSwoOX2xhiS48tz0m2crUiZkrxaVguqrcbl8Z_y_BimWvO4GnE3d_QgGUhinuQ/exec";
+
+    function showTab(tab) {
+        document.getElementById('tab-add').style.display = tab === 'add' ? 'block' : 'none';
+        document.getElementById('tab-find').style.display = tab === 'find' ? 'block' : 'none';
+        document.getElementById('btn-add').className = tab === 'add' ? 'active' : '';
+        document.getElementById('btn-find').className = tab === 'find' ? 'active' : '';
+    }
+
+    // Блокировка времени, если выбран диапазон
+    document.getElementById('dateEnd').onchange = function() {
+        const timeInput = document.getElementById('time');
+        timeInput.disabled = this.value && this.value !== document.getElementById('dateStart').value;
+    };
+
+    async function sendToGas() {
+        const data = {
+            type: 'ADD',
+            dateStart: document.getElementById('dateStart').value,
+            dateEnd: document.getElementById('dateEnd').value || document.getElementById('dateStart').value,
+            time: document.getElementById('time').value,
+            place: document.getElementById('place').value,
+            title: document.getElementById('title').value,
+            category: document.querySelector('input[name="cat"]:checked')?.value
+        };
+
+        const btn = document.querySelector('.btn-submit');
+        btn.innerText = "ЗАКАПЫВАЕМ...";
+        
+        await fetch(API_URL, {
+            method: 'POST',
+            body: JSON.stringify(data)
+        });
+
+        alert("Закопано успешно!");
+        btn.innerText = "ЗАКОПАТЬ В КАЛЕНДАРЬ";
+    }
+
+    // Логика "РАЗНЮХАТЬ" (упрощенная для примера)
+    function setYear(y) { alert("Выбран год " + y + ". Для работы поиска нужно подгрузить данные из doGet"); }
+</script>
+
+</body>
+</html>
