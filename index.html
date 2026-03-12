@@ -249,6 +249,10 @@
         
         if (result.includes("Закопано")) {
             showToast("Успешно закопано! 🐺", "var(--success)");
+            document.getElementById('title').value = "";
+document.getElementById('place').value = "";
+document.getElementById('timeStart').value = "";
+document.getElementById('timeEnd').value = "";
             setTimeout(() => location.reload(), 1000);
         } else {
             showToast("Сервер ответил ошибкой", "var(--error)");
