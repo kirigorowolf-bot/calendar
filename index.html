@@ -348,11 +348,21 @@ async function sendToGas() {
         
         if (result.includes("Закопано")) {
             showToast("Успешно закопано! 🐺", "var(--success)");
+    
             // Очистка полей формы
-            document.getElementById('title').value = "";
-            document.getElementById('place').value = "";
-            document.getElementById('timeStart').value = "";
-            document.getElementById('timeEnd').value = "";
+document.getElementById('title').value = "";
+document.getElementById('place').value = "";
+
+// Исправленная очистка времени:
+document.getElementById('hhStart').value = "";
+document.getElementById('mmStart').value = "";
+document.getElementById('hhEnd').value = "";
+document.getElementById('mmEnd').value = "";
+
+// Также стоит сбросить чекбокс "Весь день" и радиокнопку
+document.getElementById('allDay').checked = false;
+const checkedCat = document.querySelector('input[name="cat"]:checked');
+if (checkedCat) checkedCat.checked = false;
             
             // АВТО-ОБНОВЛЕНИЕ: Подтягиваем новые данные из таблицы
             await loadData(); 
