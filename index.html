@@ -81,6 +81,7 @@
     </div>
 
     <div id="tab-add">
+        <input type="hidden" id="editOldText" value="">
         <label>Дата начала:</label> <input type="date" id="dateStart">
         <label>Дата конца (диапазон):</label> <input type="date" id="dateEnd">
         <label>Время:</label>
@@ -271,11 +272,16 @@ function showDayDetails(d, m, y, el) {
     
     if (evs.length > 0) {
         html += evs.map(e => `
-            <div class="event-line" style="border-color:${e.color}; display: flex; justify-content: space-between; align-items: center;">
-                <span style="flex: 1; padding-right: 10px;">${e.text}</span>
-                <span onclick="deleteEvent('${e.text}', ${d}, ${m}, ${y})" style="cursor:pointer; padding: 5px; font-size: 18px;">🗑️</span>
-            </div>
-        `).join('');
+  <div class="event-line" style="border-color:${e.color}; display: flex; justify-content: space-between; align-items: center;">
+    <span style="flex: 1; padding-right: 10px;">${e.text}</span>
+    <div style="display: flex; gap: 10px;">
+      <!-- Кнопка редактирования -->
+      <span onclick="prepareEdit('${e.text.replace(/'/g, "\\'")}', '${dateForInput}', '${e.color}')" style="cursor:pointer; font-size: 18px;">✏️</span>
+      <!-- Твоя старая кнопка удаления -->
+      <span onclick="deleteEvent('${e.text.replace(/'/g, "\\'")}', ${d}, ${m}, ${y})" style="cursor:pointer; font-size: 18px;">🗑️</span>
+    </div>
+  </div>
+`).join('');
     } else {
         html += "Ничего не закопано.<br>";
     }
@@ -322,6 +328,15 @@ function showDayDetails(d, m, y, el) {
 
     // Функция внесения данных
 async function sendToGas() {
+    
+    if (oldText) {
+        showToast("Обновляем старую запись...");
+        await fetch(API_URL, {
+            method: 'POST',
+            body: JSON.stringify({ type: 'DELETE', text: oldText })
+        });
+    }
+    
     const btn = document.getElementById('main-submit');
     const data = {
         dateStart: document.getElementById('dateStart').value,
@@ -374,7 +389,50 @@ if (checkedCat) checkedCat.checked = false;
         btn.disabled = false;
     }
 }
+    
+function prepareEdit(fullText, dateStr, color) {
+    // 1. Запоминаем старый текст для удаления
+    document.getElementById('editOldText').value = fullText;
 
+    // 2. Ставим дату
+    document.getElementById('dateStart').value = dateStr;
+
+    // 3. Пытаемся вытащить время (формат "10:00-12:00 Текст" или "10:00 Текст")
+    const timeMatch = fullText.match(/^(\d{2}:\d{2})(?:-(\d{2}:\d{2}))?\s(.*)/);
+    let titlePart = fullText;
+
+    if (timeMatch) {
+        const [_, start, end, rest] = timeMatch;
+        const [hS, mS] = start.split(':');
+        document.getElementById('hhStart').value = hS;
+        document.getElementById('mmStart').value = mS;
+        if (end) {
+            const [hE, mE] = end.split(':');
+            document.getElementById('hhEnd').value = hE;
+            document.getElementById('mmEnd').value = mE;
+        }
+        titlePart = rest;
+        document.getElementById('allDay').checked = false;
+    } else {
+        document.getElementById('allDay').checked = true;
+    }
+
+    // 4. Вытаскиваем Место из скобок "Название (Место)"
+    const placeMatch = titlePart.match(/(.*)\s\((.*)\)/);
+    if (placeMatch) {
+        document.getElementById('title').value = placeMatch[1].trim();
+        document.getElementById('place').value = placeMatch[2].trim();
+    } else {
+        document.getElementById('title').value = titlePart.trim();
+        document.getElementById('place').value = "";
+    }
+
+    // 5. Переключаем на вкладку "Внести"
+    showTab('add');
+    
+    showToast("Редактируем запись... ✍️");
+}
+    
 </script>
 </body>
 </html>
