@@ -328,7 +328,7 @@ function showDayDetails(d, m, y, el) {
 
     // Функция внесения данных
 async function sendToGas() {
-    
+    const oldText = document.getElementById('editOldText').value;
     if (oldText) {
         showToast("Обновляем старую запись...");
         await fetch(API_URL, {
@@ -365,6 +365,7 @@ async function sendToGas() {
             showToast("Успешно закопано! 🐺", "var(--success)");
     
             // Очистка полей формы
+            document.getElementById('editOldText').value = "";
 document.getElementById('title').value = "";
 document.getElementById('place').value = "";
 
@@ -420,8 +421,8 @@ function prepareEdit(fullText, dateStr, color) {
     // 4. Вытаскиваем Место из скобок "Название (Место)"
     const placeMatch = titlePart.match(/(.*)\s\((.*)\)/);
     if (placeMatch) {
-        document.getElementById('title').value = placeMatch[1].trim();
-        document.getElementById('place').value = placeMatch[2].trim();
+        document.getElementById('title').value = placeMatch[1].trim(); // Индекс [1] - это Название
+        document.getElementById('place').value = placeMatch[2].trim(); // Индекс [2] - это Место
     } else {
         document.getElementById('title').value = titlePart.trim();
         document.getElementById('place').value = "";
